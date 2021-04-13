@@ -15,4 +15,3 @@ jobs:
         with:
           github-token: ${{ github.token }}
           action: "validate-pr"
-
