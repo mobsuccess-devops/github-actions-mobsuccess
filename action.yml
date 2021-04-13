@@ -1,0 +1,15 @@
+name: "Github Actions Mobsuccess"
+description: "Github Mobsuccess Compliance"
+inputs:
+  action:
+    description: "The action to be performed: validate-pr"
+    required: false
+  github-token:
+    description: "your github auth token"
+    required: false
+branding:
+  icon: "chevron-right"
+  color: "gray-dark"
+runs:
+  using: "node12"
+  main: "index.js"
