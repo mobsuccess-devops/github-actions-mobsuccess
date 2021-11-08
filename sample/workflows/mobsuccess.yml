@@ -17,4 +17,5 @@ jobs:
         with:
           github-token: ${{ github.token }}
           amplify-uri: ${{ secrets.AWS_AMPLIFY_URI }}
+          storybook-amplify-uri: ${{ secrets.AWS_STORYBOOK_AMPLIFY_URI }}
           action: "validate-pr"
