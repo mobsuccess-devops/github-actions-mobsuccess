@@ -1,0 +1,14 @@
+name: Merge Housekeeping
+
+on:
+  pull_request:
+    types: [ closed ]
+
+jobs:
+  NotifyZapier:
+    name: "Notify Zapier"
+    runs-on: ubuntu-20.04
+    timeout-minutes: 2
+    steps:
+      - name: "Sync #mobsuccess-review-requested"
+        run: curl https://hooks.zapier.com/hooks/catch/11360530/bmt560o/?repo=${{ github.repository }}&pr=${{ github.event.number }}
