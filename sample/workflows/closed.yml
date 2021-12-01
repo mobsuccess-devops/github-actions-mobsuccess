@@ -1,4 +1,4 @@
-name: Merge Housekeeping
+name: Closed PR Housekeeping
 
 on:
   pull_request:
