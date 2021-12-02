@@ -12,7 +12,7 @@ jobs:
     timeout-minutes: 1
     steps:
       - name: "Sync emoji in #mobsuccess-review-requested"
-        run: curl ${{ secrets.ZAPIER_REVIEW_REQUESTED_PURPLE_HEART }}?repo=${{ github.repository }}&pr=${{ github.event.number }} -D /dev/stderr -s
+        run: 'curl -D /dev/stderr -s "${{ secrets.ZAPIER_REVIEW_REQUESTED_PURPLE_HEART }}?repo=${{ github.repository }}&pr=${{ github.event.number }}"'
 
   ZapierReviewRequestedRedCross:
     if: github.event.pull_request.merged == false
@@ -21,4 +21,4 @@ jobs:
     timeout-minutes: 1
     steps:
       - name: "Sync emoji in #mobsuccess-review-requested"
-        run: curl ${{ secrets.ZAPIER_REVIEW_REQUESTED_RED_CROSS }}?repo=${{ github.repository }}&pr=${{ github.event.number }} -D /dev/stderr -s
+        run: 'curl -D /dev/stderr -s "${{ secrets.ZAPIER_REVIEW_REQUESTED_RED_CROSS }}?repo=${{ github.repository }}&pr=${{ github.event.number }}"'
