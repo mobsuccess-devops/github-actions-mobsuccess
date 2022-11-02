@@ -2,7 +2,7 @@ name: "Github Actions Mobsuccess"
 description: "Github Mobsuccess Compliance"
 inputs:
   action:
-    description: "The action to be performed: validate-pr"
+    description: "The action to be performed: validate-pr or after-pr-merged"
     required: false
   github-token:
     description: "your github auth token"
