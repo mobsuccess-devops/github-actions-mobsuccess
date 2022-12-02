@@ -1,6 +1,7 @@
 const core = require("@actions/core");
 const github = require("@actions/github");
 const { validatePR } = require("./lib/actions/pullRequest");
+const { onPRMerged } = require("./lib/actions/pullRequestMerged");
 const { generateChangelog } = require("./lib/actions/changelog");
 
 exports.getActionParameters = function getActionParameters() {
@@ -16,6 +17,9 @@ exports.action = async function action() {
   switch (action) {
     case "validate-pr":
       await validatePR({ pullRequest });
+      break;
+    case "after-pr-merged":
+      await onPRMerged({ pullRequest });
       break;
     case "changelog":
       await generateChangelog({ pullRequest });
