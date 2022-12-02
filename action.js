@@ -20,6 +20,7 @@ exports.action = async function action() {
       break;
     case "after-pr-merged":
       await onPRMerged({ pullRequest });
+      break;
     case "changelog":
       await generateChangelog({ pullRequest });
       break;
