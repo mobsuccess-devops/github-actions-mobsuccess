@@ -2,7 +2,7 @@ name: "Github Actions Mobsuccess"
 description: "Github Mobsuccess Compliance"
 inputs:
   action:
-    description: "The action to be performed: validate-pr"
+    description: "The action to be performed: validate-pr or changelog"
     required: false
   github-token:
     description: "your github auth token"
@@ -13,6 +13,15 @@ inputs:
   storybook-amplify-uri:
     description: "the AWS Amplify Storybook URI template"
     required: false
+  unreleased-tag:
+    description: "Latest unreleased (yet) tag for which to generate changelog"
+    required: false
+  max-releases:
+    description: "The number of releases for which to generate a changelog"
+    required: false
+outputs:
+  changelog:
+    description: "The generated changelog"
 branding:
   icon: "chevron-right"
   color: "gray-dark"

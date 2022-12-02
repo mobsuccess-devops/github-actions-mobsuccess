@@ -1,7 +1,7 @@
 const core = require("@actions/core");
 const github = require("@actions/github");
-//const getOctokit = require("./lib/actions/octokit");
 const { validatePR } = require("./lib/actions/pullRequest");
+const { generateChangelog } = require("./lib/actions/changelog");
 
 exports.getActionParameters = function getActionParameters() {
   const pullRequest = github.context.payload.pull_request;
@@ -16,6 +16,9 @@ exports.action = async function action() {
   switch (action) {
     case "validate-pr":
       await validatePR({ pullRequest });
+      break;
+    case "changelog":
+      await generateChangelog({ pullRequest });
       break;
   }
 };
