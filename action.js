@@ -1,6 +1,5 @@
 const core = require("@actions/core");
 const github = require("@actions/github");
-//const getOctokit = require("./lib/actions/octokit");
 const { validatePR } = require("./lib/actions/pullRequest");
 const { generateChangelog } = require("./lib/actions/changelog");
 
