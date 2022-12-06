@@ -21,7 +21,10 @@ exports.action = async function action() {
   } = exports.getActionParameters();
 
   console.info(`Calling action ${action}`);
-  console.info(`With context ${github.context}`);
+  console.info(
+    `With context ${JSON.stringify(github.context)}`,
+    github.context
+  );
   switch (action) {
     case "validate-pr":
       await validatePR({ pullRequest });
