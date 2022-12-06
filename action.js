@@ -5,7 +5,7 @@ const { onPRMerged } = require("./lib/actions/pullRequestMerged");
 const { generateChangelog } = require("./lib/actions/changelog");
 
 exports.getActionParameters = function getActionParameters() {
-  const repository = github.context.repository;
+  const repository = github.context.payload.repository;
   const ref = github.context.ref;
   const pullRequest = github.context.payload.pull_request;
   const action = core.getInput("action", { required: true });
@@ -21,10 +21,6 @@ exports.action = async function action() {
   } = exports.getActionParameters();
 
   console.info(`Calling action ${action}`);
-  console.info(
-    `With context ${JSON.stringify(github.context)}`,
-    github.context
-  );
   switch (action) {
     case "validate-pr":
       await validatePR({ pullRequest });
