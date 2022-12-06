@@ -5,13 +5,20 @@ const { onPRMerged } = require("./lib/actions/pullRequestMerged");
 const { generateChangelog } = require("./lib/actions/changelog");
 
 exports.getActionParameters = function getActionParameters() {
+  const repository = github.context.payload.repository;
+  const ref = github.context.ref;
   const pullRequest = github.context.payload.pull_request;
   const action = core.getInput("action", { required: true });
-  return { pullRequest, action };
+  return { repository, ref, pullRequest, action };
 };
 
 exports.action = async function action() {
-  const { pullRequest, action } = exports.getActionParameters();
+  const {
+    repository,
+    ref,
+    pullRequest,
+    action,
+  } = exports.getActionParameters();
 
   console.info(`Calling action ${action}`);
   switch (action) {
@@ -22,7 +29,7 @@ exports.action = async function action() {
       await onPRMerged({ pullRequest });
       break;
     case "changelog":
-      await generateChangelog({ pullRequest });
+      await generateChangelog({ repository, pullRequest, ref });
       break;
   }
 };
