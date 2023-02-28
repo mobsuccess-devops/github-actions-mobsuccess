@@ -27,6 +27,7 @@ exports.action = async function action() {
     case "validate-pr":
       if (mergeGroup) {
         console.log("Ignoring PR validation when running in merge group");
+        return;
       }
       await validatePR({ pullRequest });
       break;
