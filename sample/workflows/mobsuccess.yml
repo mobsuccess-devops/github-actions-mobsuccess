@@ -5,6 +5,11 @@ on:
     types:
       - checks_requested
 
+  issue_comment:
+    types:
+      - created
+      - edited
+
   pull_request:
     types:
       - opened
