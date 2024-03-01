@@ -1,0 +1,2 @@
+linear:
+  merged_on_master_should_mark_issue_as_in_production: true
