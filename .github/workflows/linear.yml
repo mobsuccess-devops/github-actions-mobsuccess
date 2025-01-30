@@ -11,16 +11,13 @@ on:
 
   pull_request:
     types:
-      - assigned
-      - unassigned
-      - review_requested
-      - review_request_removed
       - opened
       - synchronize
       - closed
-      - edited
-      - converted_to_draft
-      - ready_for_review
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   Linear:
