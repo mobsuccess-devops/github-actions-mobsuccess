@@ -23,7 +23,7 @@ on:
 jobs:
   MobsuccessPRCompliance:
     name: "Mobsuccess PR Compliance"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
       - uses: mobsuccess-devops/github-actions-mobsuccess@master
