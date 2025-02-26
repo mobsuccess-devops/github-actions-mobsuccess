@@ -32,7 +32,7 @@ jobs:
   notify:
     needs: [validate-yaml]
     if: failure()
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Notify
         uses: mobsuccess-devops/github-actions-notify@master
