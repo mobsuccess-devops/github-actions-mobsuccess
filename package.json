@@ -2,22 +2,22 @@
   "name": "github-actions-mobsuccess",
   "version": "1.0.0",
   "description": "Action to validate conformance to Mobsuccess policies",
-  "main": "index.js",
-  "scripts": {
-    "test": "jest --coverage",
-    "prettier": "prettier --check .",
-    "eslint": "eslint ."
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/mobsuccess-devops/github-actions-mobsuccess"
-  },
   "keywords": [
     "github-actions",
     "git"
   ],
-  "author": "Christopher Allène",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mobsuccess-devops/github-actions-mobsuccess"
+  },
   "license": "UNLICENSED",
+  "author": "Christopher Allène",
+  "main": "index.js",
+  "scripts": {
+    "eslint": "eslint .",
+    "prettier": "prettier --check .",
+    "test": "jest --coverage"
+  },
   "dependencies": {
     "@actions/core": "^1.2.6",
     "@actions/github": "^4.0.0"
