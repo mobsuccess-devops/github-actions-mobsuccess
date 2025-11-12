@@ -1,0 +1,30 @@
+name: Dockerfile
+
+on:
+  merge_group:
+    types:
+      - checks_requested
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+  push:
+    branches:
+      - master
+      - prod
+
+jobs:
+  dockerfile:
+    name: Dockerfile
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Dockerfile lint
+        uses: hadolint/hadolint-action@v3.3.0
+        with:
+          dockerfile: "Dockerfile*"
+          recursive: true
+          format: tty
+          override-info: DL3008,DL3018
+          failure-threshold: warning
