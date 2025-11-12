@@ -1,7 +1,3 @@
-# DO NOT EDIT: BEGIN
-# This snippet has been inserted automatically by mobsuccessbot, do not edit!
-# If changes are needed, update the action yamllint in
-# https://github.com/mobsuccess-devops/github-mobsuccess-policy
 name: Dockerfile
 
 on:
@@ -32,4 +28,3 @@ jobs:
           format: tty
           override-info: DL3008,DL3018
           failure-threshold: warning
-# DO NOT EDIT: END
