@@ -1,0 +1,25 @@
+# DO NOT EDIT: BEGIN
+# This snippet has been inserted automatically by mobsuccessbot, do not edit!
+# If changes are needed, update the action linear-merge-master in
+# https://github.com/mobsuccess-devops/github-mobsuccess-policy
+name: Linear merge on master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  LinearMaster:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+      cancel-in-progress: true
+    steps:
+      - uses: mobsuccess-devops/github-actions-linear@master
+        with:
+          action: update-linear-issue-state-after-merge-on-master
+          linearApiKey: ${{ secrets.LINEAR_API_KEY }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+# DO NOT EDIT: END
