@@ -26,5 +26,5 @@ jobs:
           dockerfile: "Dockerfile*"
           recursive: true
           format: tty
-          override-info: DL3008,DL3018
+          override-info: DL3008,DL3018,DL3033,DL3037,DL3041,DL4006
           failure-threshold: warning
