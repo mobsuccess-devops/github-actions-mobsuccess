@@ -19,7 +19,7 @@ jobs:
     name: Dockerfile
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Dockerfile lint
         uses: hadolint/hadolint-action@v3.3.0
         with:
