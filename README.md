@@ -49,7 +49,7 @@ The action checks for AI assistance in:
 
 ### Supported AI Tools
 
-Claude, Claude Code, ChatGPT, GPT-4, Copilot, GitHub Copilot, Gemini, Cursor, Windsurf, Codeium, Tabnine, Cody, Aider, Devin, Amazon Q, CodeWhisperer, and 50+ other tools.
+Claude, Claude Code, ChatGPT, GPT-4, Copilot, GitHub Copilot, Gemini, Cursor, Windsurf, Codeium, Tabnine, Cody, Aider, Devin, Amazon Q, CodeWhisperer, and many other tools.
 
 ### Patterns Detected
 
