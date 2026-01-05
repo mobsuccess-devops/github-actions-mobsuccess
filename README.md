@@ -4,7 +4,7 @@
 
 This action validates that the various Mobsuccess policies are enforced when
 changes are made to the repository. It checks, for example, the title of the
-pull request, the names of the branch…
+pull request, the names of the branch, and detects GenAI-assisted contributions.
 
 # Install the workflow in repository
 
@@ -29,3 +29,35 @@ Usage:
     max-releases: 10 #(optional, default to 10)
     unreleased-tag: 0.0.90289303809 # newly created unreleased tag (optional)
 ```
+
+## GenAI Detection
+
+The `validate-pr` action automatically detects GenAI-assisted PRs and adds the `genai-assisted` label.
+
+### Detection Triggers
+
+The action checks for AI assistance in:
+
+- **PR Author**: Bot accounts (dependabot, renovate, copilot, etc.)
+- **PR Body**: Mentions of AI tools (Claude, Copilot, ChatGPT, Cursor, etc.)
+- **Existing Labels**: AI-related labels (ai-assisted, copilot, claude, etc.)
+- **Commits**: Messages containing AI signatures or co-authored-by AI
+- **Comments**: Bot comments or user mentions of AI usage
+
+### Supported AI Tools
+
+Claude, Claude Code, ChatGPT, GPT-4, Copilot, GitHub Copilot, Gemini, Cursor, Windsurf, Codeium, Tabnine, Cody, Aider, Devin, Amazon Q, CodeWhisperer, and 50+ other tools.
+
+### Patterns Detected
+
+```
+- Co-Authored-By: Claude <noreply@anthropic.com>
+- Generated with [Claude Code](https://claude.ai/code)
+- AI-assisted / AI-generated
+- [Copilot] / [Claude] / [ChatGPT] in commit messages
+- "Created using Copilot" / "With help from Claude"
+```
+
+### Customization
+
+To add new patterns, edit `lib/genaiPatterns.js`. The detection is permissive: a single match triggers the label.
