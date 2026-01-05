@@ -39,9 +39,12 @@ The `validate-pr` action automatically detects GenAI-assisted PRs and adds the `
 The action checks for AI assistance in:
 
 - **PR Author**: Bot accounts (dependabot, renovate, copilot, etc.)
+- **Branch Name**: AI-prefixed branches (`cursor/`, `claude/`, `ai/`, `copilot/`, etc.)
 - **PR Body**: Mentions of AI tools (Claude, Copilot, ChatGPT, Cursor, etc.)
 - **Existing Labels**: AI-related labels (ai-assisted, copilot, claude, etc.)
 - **Commits**: Messages containing AI signatures or co-authored-by AI
+- **Commit Timing**: Rapid commits (3+ commits within 30 seconds = AI agent behavior)
+- **Files Changed**: AI config files (`.cursorrules`, `CLAUDE.md`, `.aider*`, etc.)
 - **Comments**: Bot comments or user mentions of AI usage
 
 ### Supported AI Tools
@@ -51,11 +54,22 @@ Claude, Claude Code, ChatGPT, GPT-4, Copilot, GitHub Copilot, Gemini, Cursor, Wi
 ### Patterns Detected
 
 ```
+# Commit signatures
 - Co-Authored-By: Claude <noreply@anthropic.com>
 - Generated with [Claude Code](https://claude.ai/code)
-- AI-assisted / AI-generated
 - [Copilot] / [Claude] / [ChatGPT] in commit messages
+- 🤖 emoji in commits
+
+# PR body
+- AI-assisted / AI-generated / LLM-assisted
 - "Created using Copilot" / "With help from Claude"
+
+# Branch prefixes
+- cursor/, claude/, ai/, copilot/, aider/, genai/
+
+# AI config files
+- CLAUDE.md, .cursorrules, .cursor/, .aider*, .continue/
+- .github/copilot-instructions.md, .cody/, .windsurf/
 ```
 
 ### Customization
