@@ -38,7 +38,7 @@ The `validate-pr` action automatically detects GenAI-assisted PRs and adds the `
 
 The action checks for AI assistance in:
 
-- **PR Author**: Bot accounts (dependabot, renovate, copilot, etc.)
+- **PR Author**: GenAI bot accounts (for example, `copilot[bot]`) or users indicating AI usage. Traditional automation bots like Dependabot and Renovate are not treated as GenAI-assisted.
 - **Branch Name**: AI-prefixed branches (`cursor/`, `claude/`, `ai/`, `copilot/`, etc.)
 - **PR Body**: Mentions of AI tools (Claude, Copilot, ChatGPT, Cursor, etc.)
 - **Existing Labels**: AI-related labels (ai-assisted, copilot, claude, etc.)
