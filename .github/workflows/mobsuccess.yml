@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
-      - uses: mobsuccess-devops/github-actions-mobsuccess@master
+      - uses: mobsuccess-devops/github-actions-mobsuccess@feat/add-genai-assisted-label
         with:
           github-token: ${{ github.token }}
           amplify-uri: ${{ secrets.AWS_AMPLIFY_URI }}${{ vars.AWS_AMPLIFY_URI }}
