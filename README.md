@@ -44,7 +44,7 @@ The action checks for AI assistance in:
 - **Existing Labels**: AI-related labels (ai-assisted, copilot, claude, etc.)
 - **Commits**: Messages containing AI signatures or co-authored-by AI
 - **Commit Timing**: Rapid commits (3+ commits within 30 seconds = AI agent behavior)
-- **Files Changed**: AI config files (`.cursorrules`, `CLAUDE.md`, `.aider*`, etc.)
+- **Files Changed**: (detection disabled)
 - **Comments**: Bot comments or user mentions of AI usage
 
 ### Supported AI Tools
@@ -66,10 +66,6 @@ Claude, Claude Code, ChatGPT, GPT-4, Copilot, GitHub Copilot, Gemini, Cursor, Wi
 
 # Branch prefixes
 - cursor/, claude/, ai/, copilot/, aider/, genai/
-
-# AI config files
-- CLAUDE.md, .cursorrules, .cursor/, .aider*, .continue/
-- .github/copilot-instructions.md, .cody/, .windsurf/
 ```
 
 ### Customization
