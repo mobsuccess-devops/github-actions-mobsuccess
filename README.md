@@ -1,7 +1,5 @@
 # Github Mobsuccess action
 
-mvp : ok
-
 [![NPM](https://github.com/mobsuccess-devops/github-actions-mobsuccess/actions/workflows/npm.yml/badge.svg)](https://github.com/mobsuccess-devops/github-actions-mobsuccess/actions/workflows/npm.yml)
 
 This action validates that the various Mobsuccess policies are enforced when
@@ -38,18 +36,18 @@ The `validate-pr` action automatically detects GenAI-assisted PRs and adds the `
 
 ### How it works
 
-The system uses a **unified approach** for all AI coding agents (Claude Code, Cursor, etc.):
+The system uses a **unified approach** for AI coding agents (Claude Code, Cursor, etc.):
 
 ```
 Agent (Claude Code or Cursor) stops
          ↓
-Hook "stop" creates .genai-assisted marker file
+Hook "stop" creates marker file (.claude-assisted or .cursor-assisted)
          ↓
 User commits (from any terminal, IDE, etc.)
          ↓
 Git hook "prepare-commit-msg" detects marker
          ↓
-Adds "Co-Authored-By: GenAI" + removes marker
+Adds "Co-Authored-By: Claude" or "Co-Authored-By: Cursor" + removes marker
          ↓
 GitHub Action detects Co-Authored-By → Adds label
 ```
@@ -60,12 +58,19 @@ The git hooks are automatically configured via `npm install` (postinstall script
 
 #### Files involved
 
-| File                           | Purpose                                                         |
-| ------------------------------ | --------------------------------------------------------------- |
-| `.githooks/prepare-commit-msg` | Adds `Co-Authored-By: GenAI` if `.genai-assisted` marker exists |
-| `.cursor/hooks.json`           | Cursor hook: creates `.genai-assisted` when agent stops         |
-| `.claude/settings.json`        | Claude Code hook: creates `.genai-assisted` when agent stops    |
-| `.genai-assisted`              | Temporary marker file (gitignored)                              |
+| File | Purpose |
+|------|---------|
+| `.githooks/prepare-commit-msg` | Adds `Co-Authored-By` based on marker file |
+| `.cursor/hooks.json` | Cursor hook: creates `.cursor-assisted` when agent stops |
+| `.claude/settings.json` | Claude Code hook: creates `.claude-assisted` when agent stops |
+| `.cursor-assisted` / `.claude-assisted` | Temporary marker files (gitignored) |
+
+#### Co-Authored-By tags
+
+| Agent | Marker file | Co-Authored-By |
+|-------|-------------|----------------|
+| **Cursor** | `.cursor-assisted` | `Co-Authored-By: Cursor` |
+| **Claude Code** | `.claude-assisted` | `Co-Authored-By: Claude` |
 
 #### How to enable for your agent
 
@@ -73,7 +78,7 @@ The git hooks are automatically configured via `npm install` (postinstall script
 
 **Cursor**: Already configured in `.cursor/hooks.json`
 
-**Other agents**: Create a hook that runs `touch .genai-assisted` when the agent stops working.
+**Other agents**: Create a hook that runs `touch .<agent>-assisted` when the agent stops, and add detection in `.githooks/prepare-commit-msg`.
 
 ### Detection Triggers (GitHub Action)
 
@@ -83,7 +88,7 @@ The action checks for AI assistance in:
 - **Branch Name**: AI-prefixed branches (`cursor/`, `claude/`, `ai/`, `copilot/`, etc.)
 - **PR Body**: Mentions of AI tools (Claude, Copilot, ChatGPT, Cursor, etc.)
 - **Existing Labels**: AI-related labels (ai-assisted, copilot, claude, etc.)
-- **Commits**: Messages containing AI signatures or `Co-Authored-By: GenAI`
+- **Commits**: Messages containing AI signatures or `Co-Authored-By: Claude/Cursor`
 - **Commit Timing**: Rapid commits (3+ commits within 30 seconds = AI agent behavior)
 - **Comments**: Bot comments or user mentions of AI usage
 
@@ -95,7 +100,8 @@ Claude, Claude Code, ChatGPT, GPT-4, Copilot, GitHub Copilot, Gemini, Cursor, Wi
 
 ```
 # Commit signatures (added automatically by hooks)
-- Co-Authored-By: GenAI
+- Co-Authored-By: Claude
+- Co-Authored-By: Cursor
 - Co-Authored-By: Claude <noreply@anthropic.com>
 - Generated with [Claude Code](https://claude.ai/code)
 - [Copilot] / [Claude] / [ChatGPT] in commit messages
