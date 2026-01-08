@@ -18,7 +18,9 @@ if [ -f ".cursor-assisted" ]; then
   echo "" >> "$COMMIT_MSG_FILE"
   echo "Co-Authored-By: Cursor" >> "$COMMIT_MSG_FILE"
   rm -f .cursor-assisted
-elif [ -f ".claude-assisted" ]; then
+fi
+
+if [ -f ".claude-assisted" ]; then
   echo "" >> "$COMMIT_MSG_FILE"
   echo "Co-Authored-By: Claude" >> "$COMMIT_MSG_FILE"
   rm -f .claude-assisted

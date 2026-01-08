@@ -10,10 +10,10 @@ No manual setup required - ms-bot automatically creates PRs when changes are nee
 
 ## Features
 
-| Action | Description |
-|--------|-------------|
+| Action        | Description                                                                                                                                                      |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `validate-pr` | Validates PR title and branch name conventions, adds branch tag label, detects GenAI-assisted PRs (adds `genai-assisted` label), posts AWS Amplify preview links |
-| `changelog` | Generates changelog for the last X releases |
+| `changelog`   | Generates changelog for the last X releases                                                                                                                      |
 
 ## Usage
 

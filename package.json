@@ -14,8 +14,8 @@
   "author": "Christopher Allène",
   "main": "index.js",
   "scripts": {
-    "postinstall": "git config core.hooksPath .githooks",
     "eslint": "eslint .",
+    "postinstall": "git config core.hooksPath .githooks",
     "prettier": "prettier --check .",
     "test": "jest --coverage"
   },
