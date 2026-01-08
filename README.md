@@ -1,5 +1,7 @@
 # Github Mobsuccess action
 
+mvp : ok
+
 [![NPM](https://github.com/mobsuccess-devops/github-actions-mobsuccess/actions/workflows/npm.yml/badge.svg)](https://github.com/mobsuccess-devops/github-actions-mobsuccess/actions/workflows/npm.yml)
 
 This action validates that the various Mobsuccess policies are enforced when

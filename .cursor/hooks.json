@@ -3,7 +3,7 @@
   "hooks": {
     "stop": [
       {
-        "command": "touch .genai-assisted"
+        "command": "touch .cursor-assisted"
       }
     ]
   }
