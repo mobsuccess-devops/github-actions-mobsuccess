@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/add-genai-label.sh"
+            "command": "touch .genai-assisted"
           }
         ]
       }

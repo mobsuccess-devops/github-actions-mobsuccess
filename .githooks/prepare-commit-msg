@@ -1,0 +1,19 @@
+#!/bin/sh
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+
+# Skip for merge/squash commits
+case "$COMMIT_SOURCE" in
+  merge|squash) exit 0 ;;
+esac
+
+# Only add Co-Authored-By if an AI agent was used (marker file exists)
+if [ -f ".genai-assisted" ]; then
+  # Check if Co-Authored-By is already present
+  if ! grep -q "Co-[Aa]uthored-[Bb]y:.*\(Claude\|Cursor\|GenAI\)" "$COMMIT_MSG_FILE"; then
+    echo "" >> "$COMMIT_MSG_FILE"
+    echo "Co-Authored-By: GenAI" >> "$COMMIT_MSG_FILE"
+  fi
+  # Remove the marker file
+  rm -f .genai-assisted
+fi
