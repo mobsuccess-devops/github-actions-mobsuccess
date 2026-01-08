@@ -8,7 +8,7 @@ case "$COMMIT_SOURCE" in
 esac
 
 # Check if Co-Authored-By is already present
-if grep -q "Co-[Aa]uthored-[Bb]y:.*\(Claude\|Cursor\|GenAI\)" "$COMMIT_MSG_FILE"; then
+if grep -qi "co-authored-by:.*\(claude\|cursor\|genai\)" "$COMMIT_MSG_FILE"; then
   rm -f .cursor-assisted .claude-assisted
   exit 0
 fi
