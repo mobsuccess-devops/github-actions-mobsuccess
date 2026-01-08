@@ -1,6 +1,6 @@
 # Github Mobsuccess action
 
-# TESTINPROGRESS
+test
 
 [![NPM](https://github.com/mobsuccess-devops/github-actions-mobsuccess/actions/workflows/npm.yml/badge.svg)](https://github.com/mobsuccess-devops/github-actions-mobsuccess/actions/workflows/npm.yml)
 
@@ -36,7 +36,46 @@ Usage:
 
 The `validate-pr` action automatically detects GenAI-assisted PRs and adds the `genai-assisted` label.
 
-### Detection Triggers
+### How it works
+
+The system uses a **unified approach** for all AI coding agents (Claude Code, Cursor, etc.):
+
+```
+Agent (Claude Code or Cursor) stops
+         ↓
+Hook "stop" creates .genai-assisted marker file
+         ↓
+User commits (from any terminal, IDE, etc.)
+         ↓
+Git hook "prepare-commit-msg" detects marker
+         ↓
+Adds "Co-Authored-By: GenAI" + removes marker
+         ↓
+GitHub Action detects Co-Authored-By → Adds label
+```
+
+### Local Setup (for developers)
+
+The git hooks are automatically configured via `npm install` (postinstall script sets `core.hooksPath`).
+
+#### Files involved
+
+| File | Purpose |
+|------|---------|
+| `.githooks/prepare-commit-msg` | Adds `Co-Authored-By: GenAI` if `.genai-assisted` marker exists |
+| `.cursor/hooks.json` | Cursor hook: creates `.genai-assisted` when agent stops |
+| `.claude/settings.json` | Claude Code hook: creates `.genai-assisted` when agent stops |
+| `.genai-assisted` | Temporary marker file (gitignored) |
+
+#### How to enable for your agent
+
+**Claude Code**: Already configured in `.claude/settings.json`
+
+**Cursor**: Already configured in `.cursor/hooks.json`
+
+**Other agents**: Create a hook that runs `touch .genai-assisted` when the agent stops working.
+
+### Detection Triggers (GitHub Action)
 
 The action checks for AI assistance in:
 
@@ -44,9 +83,8 @@ The action checks for AI assistance in:
 - **Branch Name**: AI-prefixed branches (`cursor/`, `claude/`, `ai/`, `copilot/`, etc.)
 - **PR Body**: Mentions of AI tools (Claude, Copilot, ChatGPT, Cursor, etc.)
 - **Existing Labels**: AI-related labels (ai-assisted, copilot, claude, etc.)
-- **Commits**: Messages containing AI signatures or co-authored-by AI
+- **Commits**: Messages containing AI signatures or `Co-Authored-By: GenAI`
 - **Commit Timing**: Rapid commits (3+ commits within 30 seconds = AI agent behavior)
-- **Files Changed**: (detection disabled)
 - **Comments**: Bot comments or user mentions of AI usage
 
 ### Supported AI Tools
@@ -56,11 +94,11 @@ Claude, Claude Code, ChatGPT, GPT-4, Copilot, GitHub Copilot, Gemini, Cursor, Wi
 ### Patterns Detected
 
 ```
-# Commit signatures
+# Commit signatures (added automatically by hooks)
+- Co-Authored-By: GenAI
 - Co-Authored-By: Claude <noreply@anthropic.com>
 - Generated with [Claude Code](https://claude.ai/code)
 - [Copilot] / [Claude] / [ChatGPT] in commit messages
-- 🤖 emoji in commits
 
 # PR body
 - AI-assisted / AI-generated / LLM-assisted
