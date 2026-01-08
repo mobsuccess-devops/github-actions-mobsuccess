@@ -58,18 +58,18 @@ The git hooks are automatically configured via `npm install` (postinstall script
 
 #### Files involved
 
-| File | Purpose |
-|------|---------|
-| `.githooks/prepare-commit-msg` | Adds `Co-Authored-By` based on marker file |
-| `.cursor/hooks.json` | Cursor hook: creates `.cursor-assisted` when agent stops |
-| `.claude/settings.json` | Claude Code hook: creates `.claude-assisted` when agent stops |
-| `.cursor-assisted` / `.claude-assisted` | Temporary marker files (gitignored) |
+| File                                    | Purpose                                                       |
+| --------------------------------------- | ------------------------------------------------------------- |
+| `.githooks/prepare-commit-msg`          | Adds `Co-Authored-By` based on marker file                    |
+| `.cursor/hooks.json`                    | Cursor hook: creates `.cursor-assisted` when agent stops      |
+| `.claude/settings.json`                 | Claude Code hook: creates `.claude-assisted` when agent stops |
+| `.cursor-assisted` / `.claude-assisted` | Temporary marker files (gitignored)                           |
 
 #### Co-Authored-By tags
 
-| Agent | Marker file | Co-Authored-By |
-|-------|-------------|----------------|
-| **Cursor** | `.cursor-assisted` | `Co-Authored-By: Cursor` |
+| Agent           | Marker file        | Co-Authored-By           |
+| --------------- | ------------------ | ------------------------ |
+| **Cursor**      | `.cursor-assisted` | `Co-Authored-By: Cursor` |
 | **Claude Code** | `.claude-assisted` | `Co-Authored-By: Claude` |
 
 #### How to enable for your agent
