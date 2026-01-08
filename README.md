@@ -1,7 +1,5 @@
 # Github Mobsuccess action
 
-test
-
 [![NPM](https://github.com/mobsuccess-devops/github-actions-mobsuccess/actions/workflows/npm.yml/badge.svg)](https://github.com/mobsuccess-devops/github-actions-mobsuccess/actions/workflows/npm.yml)
 
 This action validates that the various Mobsuccess policies are enforced when
@@ -60,12 +58,12 @@ The git hooks are automatically configured via `npm install` (postinstall script
 
 #### Files involved
 
-| File | Purpose |
-|------|---------|
+| File                           | Purpose                                                         |
+| ------------------------------ | --------------------------------------------------------------- |
 | `.githooks/prepare-commit-msg` | Adds `Co-Authored-By: GenAI` if `.genai-assisted` marker exists |
-| `.cursor/hooks.json` | Cursor hook: creates `.genai-assisted` when agent stops |
-| `.claude/settings.json` | Claude Code hook: creates `.genai-assisted` when agent stops |
-| `.genai-assisted` | Temporary marker file (gitignored) |
+| `.cursor/hooks.json`           | Cursor hook: creates `.genai-assisted` when agent stops         |
+| `.claude/settings.json`        | Claude Code hook: creates `.genai-assisted` when agent stops    |
+| `.genai-assisted`              | Temporary marker file (gitignored)                              |
 
 #### How to enable for your agent
 
