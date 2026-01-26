@@ -46,4 +46,3 @@ Automatically detects AI-assisted PRs and adds the `genai-assisted` label.
 **Supported tools:** Claude, Copilot, ChatGPT, Cursor, Gemini, Windsurf, Codeium, Tabnine, Aider, Devin, Amazon Q, and more.
 
 **Customization:** Edit `lib/genaiPatterns.js` to add patterns.
-
