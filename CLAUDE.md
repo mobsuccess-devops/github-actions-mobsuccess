@@ -20,11 +20,13 @@ npm run test          # Run tests with coverage (Jest)
 **Entry Point Flow**: `index.js` → `action.js` (dispatcher) → specific action handler in `lib/actions/`
 
 **Three Main Actions**:
+
 - `validate-pr`: Validates branch names and PR titles against conventions
 - `after-pr-merged`: Post-merge automation (rebase notifications for sub-branches)
 - `changelog`: Generates changelog from releases and PRs
 
 **Key Modules**:
+
 - `lib/branch.js`: Branch naming convention validator (regex-based)
 - `lib/pullRequest.js`: PR title validation (Conventional Commits format)
 - `lib/actions/pullRequest.js`: Full PR validation logic including GitHub API calls
@@ -39,6 +41,7 @@ Special prefixes: `renovate/`, `copilot/`, `claude/`, `crowdin/update-translatio
 **Sub-branches**: Branches based on non-main branches must use `baseRef--` prefix (e.g., `develop--feat/something`)
 
 **PR Titles**: Conventional Commits format: `{type}({scope})!: {description}`
+
 - Types: `hotfix|feat|fix|chore|docs|refactor|test|revert|build|ci|perf|style|change|remove|poc`
 - Scope and `!` (breaking change marker) are optional
 - Revert format: `revert {original message}`
