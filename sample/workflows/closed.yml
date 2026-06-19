@@ -30,7 +30,8 @@ jobs:
     timeout-minutes: 2
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
+      issues: write
     steps:
       - uses: mobsuccess-devops/github-actions-mobsuccess@master
         with:
