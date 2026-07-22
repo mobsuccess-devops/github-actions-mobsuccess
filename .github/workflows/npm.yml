@@ -17,25 +17,27 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 1
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: mobsuccess-devops/github-actions-packagejsonlint@master
   sortpackagejson:
     name: Sort Package Json
     runs-on: ubuntu-24.04
     timeout-minutes: 7
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20.12.0
+          node-version: 24
+      - run: npm install -g npm@11.10.0
+        name: Upgrade npm
       - name: Cache Node Modules
         id: cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         env:
           cache-name: cache-node-modules
         with:
           path: ./node_modules
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/package-lock.json') }}-node-20.12.0
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/package-lock.json') }}-node-24
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.MS_READ_PACKAGES_GITHUB_PAT }}" >> ~/.npmrc
         name: Configure Credentials For GitHub Packages
       - run: npm ci
@@ -50,18 +52,20 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 7
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20.12.0
+          node-version: 24
+      - run: npm install -g npm@11.10.0
+        name: Upgrade npm
       - name: Cache Node Modules
         id: cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         env:
           cache-name: cache-node-modules
         with:
           path: ./node_modules
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/package-lock.json') }}-node-20.12.0
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/package-lock.json') }}-node-24
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.MS_READ_PACKAGES_GITHUB_PAT }}" >> ~/.npmrc
         name: Configure Credentials For GitHub Packages
       - run: npm ci
@@ -74,18 +78,20 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 7
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20.12.0
+          node-version: 24
+      - run: npm install -g npm@11.10.0
+        name: Upgrade npm
       - name: Cache Node Modules
         id: cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         env:
           cache-name: cache-node-modules
         with:
           path: ./node_modules
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/package-lock.json') }}-node-20.12.0
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/package-lock.json') }}-node-24
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.MS_READ_PACKAGES_GITHUB_PAT }}" >> ~/.npmrc
         name: Configure Credentials For GitHub Packages
       - run: npm ci
@@ -98,18 +104,20 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 7
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20.12.0
+          node-version: 24
+      - run: npm install -g npm@11.10.0
+        name: Upgrade npm
       - name: Cache Node Modules
         id: cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         env:
           cache-name: cache-node-modules
         with:
           path: ./node_modules
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/package-lock.json') }}-node-20.12.0
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/package-lock.json') }}-node-24
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.MS_READ_PACKAGES_GITHUB_PAT }}" >> ~/.npmrc
         name: Configure Credentials For GitHub Packages
       - run: npm ci
