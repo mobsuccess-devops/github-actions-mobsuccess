@@ -52,16 +52,41 @@ jobs:
           set -uo pipefail
           fail=0
 
+          # Fail closed. This guard stands in front of an irreversible deletion, so
+          # it must never report success because git itself failed: an empty result
+          # from a command that errored would otherwise read as "nothing to flag".
+          # `set -e` is deliberately not used — check-ignore's non-zero exit is the
+          # predicate this script is built on — so each call is checked explicitly.
+          die() { echo "::error::$1"; exit 1; }
+
+          diff_out=$(git diff --raw --no-renames --diff-filter=AMT "$BASE_SHA...$HEAD_SHA") \
+            || die "Cannot diff $BASE_SHA...$HEAD_SHA. Refusing to pass without having checked."
+          tree_out=$(git ls-tree -r --name-only "$HEAD_SHA") \
+            || die "Cannot list the tree at $HEAD_SHA. Refusing to pass without having checked."
+
           # Probe sandbox: HEAD's .gitignore files and nothing else. Probing cannot
           # happen in the real worktree — once the symlink exists on disk, git
           # refuses to resolve a pathspec "beyond a symbolic link".
           sandbox=$(mktemp -d)
           trap 'rm -rf "$sandbox"' EXIT
           git -C "$sandbox" init -q .
+
+          # Only ignore rules committed to the repo may decide the verdict. A
+          # runner's global core.excludesFile and the info/exclude the init
+          # template writes both reach --no-index, and would make the result
+          # depend on the machine rather than on the PR.
+          : > "$sandbox/.git/info/exclude"
+          ignored() {
+            git -c core.excludesFile=/dev/null -C "$sandbox" \
+              check-ignore -q --no-index -- "$1"
+          }
+
           while IFS= read -r gi; do
+            [ -n "$gi" ] || continue
             mkdir -p "$sandbox/$(dirname "$gi")"
-            git show "$HEAD_SHA:$gi" > "$sandbox/$gi" 2>/dev/null
-          done < <(git ls-tree -r --name-only "$HEAD_SHA" | grep -E '(^|/)\.gitignore$' || true)
+            git show "$HEAD_SHA:$gi" > "$sandbox/$gi" \
+              || die "Cannot read $gi at $HEAD_SHA. Refusing to pass without having checked."
+          done < <(printf '%s\n' "$tree_out" | grep -E '(^|/)\.gitignore$')
 
           while IFS= read -r line; do
             [ -n "$line" ] || continue
@@ -74,18 +99,25 @@ jobs:
             # so negations, nesting and precedence are handled for free: children
             # of the path are ignored, the path itself is not. check-ignore uses
             # lstat, so a symlink to a real directory still reads as "not a dir".
-            if ! git -C "$sandbox" check-ignore -q --no-index -- "$path" \
-               && git -C "$sandbox" check-ignore -q --no-index -- "$path/__probe__"; then
+            if ! ignored "$path" && ignored "$path/__probe__"; then
               kind="file"
-              [ "$mode" = "120000" ] && kind="symlink -> $(git show "$HEAD_SHA:$path")"
+              if [ "$mode" = "120000" ]; then
+                t=$(git show "$HEAD_SHA:$path") \
+                  || die "Cannot read the symlink target of $path at $HEAD_SHA."
+                kind="symlink -> $t"
+              fi
               echo "::error file=$path::Tracking '$path' ($kind) will DELETE the ignored directory of the same name when this is merged or checked out — its contents are gitignored but the path itself is not."
               fail=1
             fi
 
             # Independent rule: a tracked symlink must not escape the worktree.
             if [ "$mode" = "120000" ]; then
-              target=$(git show "$HEAD_SHA:$path")
-              resolved=$(python3 -c 'import posixpath,sys; print(posixpath.normpath(posixpath.join(posixpath.dirname(sys.argv[1]), sys.argv[2])))' "$path" "$target")
+              target=$(git show "$HEAD_SHA:$path") \
+                || die "Cannot read the symlink target of $path at $HEAD_SHA."
+              # normpath is pure string work: it must not resolve against the
+              # worktree, where the symlink already exists.
+              resolved=$(python3 -c 'import posixpath,sys; print(posixpath.normpath(posixpath.join(posixpath.dirname(sys.argv[1]), sys.argv[2])))' "$path" "$target") \
+                || die "Cannot resolve the symlink target of $path."
               escape=0
               case "$target" in /*) escape=1 ;; esac
               case "$resolved" in ..*) escape=1 ;; esac
@@ -94,7 +126,7 @@ jobs:
                 fail=1
               fi
             fi
-          done < <(git diff --raw --no-renames --diff-filter=AMT "$BASE_SHA...$HEAD_SHA")
+          done < <(printf '%s\n' "$diff_out")
 
           if [ "$fail" -ne 0 ]; then
             echo ""
