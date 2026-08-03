@@ -55,20 +55,39 @@ jobs:
           # Fail closed. This guard stands in front of an irreversible deletion, so
           # it must never report success because git itself failed: an empty result
           # from a command that errored would otherwise read as "nothing to flag".
-          # `set -e` is deliberately not used — check-ignore's non-zero exit is the
-          # predicate this script is built on — so each call is checked explicitly.
-          die() { echo "::error::$1"; exit 1; }
+          # The runner's default shell is `bash -e`, but nothing here leans on that:
+          # check-ignore's non-zero exit is this script's core predicate, so every
+          # git call whose silence would be mistaken for success is checked by hand.
+          #
+          # printf rather than echo throughout: some shells expand backslash escapes
+          # in echo, which would turn a literal \n inside a path back into a real
+          # newline and undo the escaping below.
+          die() { printf '%s\n' "::error::$(esc "$1")"; exit 1; }
 
-          diff_out=$(git diff --raw --no-renames --diff-filter=AMT "$BASE_SHA...$HEAD_SHA") \
+          # GitHub parses workflow commands one line at a time, so every value
+          # interpolated into one is escaped: a path may legally contain a newline,
+          # which would otherwise let it forge a second command. Property values
+          # need `:` and `,` too, as those delimit the property list.
+          esc() { local s=${1//'%'/%25}; s=${s//$'\r'/%0D}; s=${s//$'\n'/%0A}; printf '%s' "$s"; }
+          esc_prop() { local s; s=$(esc "$1"); s=${s//:/%3A}; s=${s//,/%2C}; printf '%s' "$s"; }
+
+          work=$(mktemp -d)
+          trap 'rm -rf "$work"' EXIT
+
+          # -z keeps paths literal. Without it git C-quotes any path containing a
+          # control character, and that quoted string matches neither the repo nor
+          # the ignore rules — so a crafted path could slip past the check. Literal
+          # paths are why the escaping above is required, not optional.
+          git diff --raw -z --no-renames --diff-filter=AMT "$BASE_SHA...$HEAD_SHA" > "$work/diff" \
             || die "Cannot diff $BASE_SHA...$HEAD_SHA. Refusing to pass without having checked."
-          tree_out=$(git ls-tree -r --name-only "$HEAD_SHA") \
+          git ls-tree -r -z --name-only "$HEAD_SHA" > "$work/tree" \
             || die "Cannot list the tree at $HEAD_SHA. Refusing to pass without having checked."
 
           # Probe sandbox: HEAD's .gitignore files and nothing else. Probing cannot
           # happen in the real worktree — once the symlink exists on disk, git
           # refuses to resolve a pathspec "beyond a symbolic link".
-          sandbox=$(mktemp -d)
-          trap 'rm -rf "$sandbox"' EXIT
+          sandbox="$work/sandbox"
+          mkdir -p "$sandbox"
           git -C "$sandbox" init -q .
 
           # Only ignore rules committed to the repo may decide the verdict. A
@@ -81,17 +100,17 @@ jobs:
               check-ignore -q --no-index -- "$1"
           }
 
-          while IFS= read -r gi; do
-            [ -n "$gi" ] || continue
+          while IFS= read -r -d '' gi; do
+            case "$gi" in .gitignore|*/.gitignore) ;; *) continue ;; esac
             mkdir -p "$sandbox/$(dirname "$gi")"
             git show "$HEAD_SHA:$gi" > "$sandbox/$gi" \
               || die "Cannot read $gi at $HEAD_SHA. Refusing to pass without having checked."
-          done < <(printf '%s\n' "$tree_out" | grep -E '(^|/)\.gitignore$')
+          done < "$work/tree"
 
-          while IFS= read -r line; do
-            [ -n "$line" ] || continue
-            mode=$(printf '%s' "$line" | awk '{print $2}')
-            path=$(printf '%s' "$line" | cut -f2-)
+          # --raw -z emits ":<modes> <shas> <status>" and the path as two separate
+          # NUL-terminated records, so read them in pairs.
+          while IFS= read -r -d '' meta && IFS= read -r -d '' path; do
+            mode=$(printf '%s' "$meta" | awk '{print $2}')
             # A tracked directory is normal; only blobs and symlinks land at a path.
             case "$mode" in 040000|000000) continue ;; esac
 
@@ -106,7 +125,7 @@ jobs:
                   || die "Cannot read the symlink target of $path at $HEAD_SHA."
                 kind="symlink -> $t"
               fi
-              echo "::error file=$path::Tracking '$path' ($kind) will DELETE the ignored directory of the same name when this is merged or checked out — its contents are gitignored but the path itself is not."
+              printf '%s\n' "::error file=$(esc_prop "$path")::$(esc "Tracking '$path' ($kind) will DELETE the ignored directory of the same name when this is merged or checked out — its contents are gitignored but the path itself is not.")"
               fail=1
             fi
 
@@ -122,11 +141,11 @@ jobs:
               case "$target" in /*) escape=1 ;; esac
               case "$resolved" in ..*) escape=1 ;; esac
               if [ "$escape" -eq 1 ]; then
-                echo "::error file=$path::Symlink '$path' -> '$target' points outside the repository. Tracked symlinks must stay repo-internal."
+                printf '%s\n' "::error file=$(esc_prop "$path")::$(esc "Symlink '$path' -> '$target' points outside the repository. Tracked symlinks must stay repo-internal.")"
                 fail=1
               fi
             fi
-          done < <(printf '%s\n' "$diff_out")
+          done < "$work/diff"
 
           if [ "$fail" -ne 0 ]; then
             echo ""
