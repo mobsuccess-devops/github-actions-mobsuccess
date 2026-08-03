@@ -28,3 +28,82 @@ jobs:
           amplify-uri: ${{ secrets.AWS_AMPLIFY_URI }}${{ vars.AWS_AMPLIFY_URI }}
           storybook-amplify-uri: ${{ secrets.AWS_STORYBOOK_AMPLIFY_URI }}${{ vars.AWS_STORYBOOK_AMPLIFY_URI }}
           action: "validate-pr"
+
+      # blob:none keeps this cheap even on the monolith: full commit graph (needed
+      # for the base...head merge base), file contents fetched only on demand.
+      - name: Checkout
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          filter: blob:none
+
+      # A .gitignore pattern that only reaches INSIDE a directory (dir/, dir/*,
+      # dir/**) does not ignore a symlink or file at `dir` itself, so `git add -A`
+      # stages it. Merging that commit makes git delete the ignored directory to
+      # put the tracked entry in its place — silently, with no trash and no reflog
+      # for untracked content. Already happened in the org: panoramai#433.
+      - name: Ignored directory replacement
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -uo pipefail
+          fail=0
+
+          # Probe sandbox: HEAD's .gitignore files and nothing else. Probing cannot
+          # happen in the real worktree — once the symlink exists on disk, git
+          # refuses to resolve a pathspec "beyond a symbolic link".
+          sandbox=$(mktemp -d)
+          trap 'rm -rf "$sandbox"' EXIT
+          git -C "$sandbox" init -q .
+          while IFS= read -r gi; do
+            mkdir -p "$sandbox/$(dirname "$gi")"
+            git show "$HEAD_SHA:$gi" > "$sandbox/$gi" 2>/dev/null
+          done < <(git ls-tree -r --name-only "$HEAD_SHA" | grep -E '(^|/)\.gitignore$' || true)
+
+          while IFS= read -r line; do
+            [ -n "$line" ] || continue
+            mode=$(printf '%s' "$line" | awk '{print $2}')
+            path=$(printf '%s' "$line" | cut -f2-)
+            # A tracked directory is normal; only blobs and symlinks land at a path.
+            case "$mode" in 040000|000000) continue ;; esac
+
+            # Hole test, decided by git's own matcher rather than pattern parsing,
+            # so negations, nesting and precedence are handled for free: children
+            # of the path are ignored, the path itself is not. check-ignore uses
+            # lstat, so a symlink to a real directory still reads as "not a dir".
+            if ! git -C "$sandbox" check-ignore -q --no-index -- "$path" \
+               && git -C "$sandbox" check-ignore -q --no-index -- "$path/__probe__"; then
+              kind="file"
+              [ "$mode" = "120000" ] && kind="symlink -> $(git show "$HEAD_SHA:$path")"
+              echo "::error file=$path::Tracking '$path' ($kind) will DELETE the ignored directory of the same name when this is merged or checked out — its contents are gitignored but the path itself is not."
+              fail=1
+            fi
+
+            # Independent rule: a tracked symlink must not escape the worktree.
+            if [ "$mode" = "120000" ]; then
+              target=$(git show "$HEAD_SHA:$path")
+              resolved=$(python3 -c 'import posixpath,sys; print(posixpath.normpath(posixpath.join(posixpath.dirname(sys.argv[1]), sys.argv[2])))' "$path" "$target")
+              escape=0
+              case "$target" in /*) escape=1 ;; esac
+              case "$resolved" in ..*) escape=1 ;; esac
+              if [ "$escape" -eq 1 ]; then
+                echo "::error file=$path::Symlink '$path' -> '$target' points outside the repository. Tracked symlinks must stay repo-internal."
+                fail=1
+              fi
+            fi
+          done < <(git diff --raw --no-renames --diff-filter=AMT "$BASE_SHA...$HEAD_SHA")
+
+          if [ "$fail" -ne 0 ]; then
+            echo ""
+            echo "Remove the offending entry from the commit: git rm --cached <path>"
+            echo ""
+            echo "Do NOT 'fix' the .gitignore instead: 'dir/*' plus '!dir/keep' cannot be"
+            echo "rewritten as a bare 'dir', because git will not re-include anything inside"
+            echo "an ignored directory. A bare 'dir' is correct only where there is no"
+            echo "negation to preserve."
+            exit 1
+          fi
+          echo "No ignored-directory replacement detected."
