@@ -33,7 +33,7 @@ jobs:
       # for the base...head merge base), file contents fetched only on demand.
       - name: Checkout
         if: github.event_name == 'pull_request'
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           filter: blob:none
