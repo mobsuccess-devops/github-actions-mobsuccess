@@ -29,20 +29,13 @@ jobs:
           storybook-amplify-uri: ${{ secrets.AWS_STORYBOOK_AMPLIFY_URI }}${{ vars.AWS_STORYBOOK_AMPLIFY_URI }}
           action: "validate-pr"
 
-      # blob:none keeps this cheap even on the monolith: full commit graph (needed
-      # for the base...head merge base), file contents fetched only on demand.
       - name: Checkout
         if: github.event_name == 'pull_request'
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           filter: blob:none
 
-      # A .gitignore pattern that only reaches INSIDE a directory (dir/, dir/*,
-      # dir/**) does not ignore a symlink or file at `dir` itself, so `git add -A`
-      # stages it. Merging that commit makes git delete the ignored directory to
-      # put the tracked entry in its place — silently, with no trash and no reflog
-      # for untracked content. Already happened in the org: panoramai#433.
       - name: Ignored directory replacement
         if: github.event_name == 'pull_request'
         env:
@@ -52,48 +45,23 @@ jobs:
           set -uo pipefail
           fail=0
 
-          # Fail closed. This guard stands in front of an irreversible deletion, so
-          # it must never report success because git itself failed: an empty result
-          # from a command that errored would otherwise read as "nothing to flag".
-          # The runner's default shell is `bash -e`, but nothing here leans on that:
-          # check-ignore's non-zero exit is this script's core predicate, so every
-          # git call whose silence would be mistaken for success is checked by hand.
-          #
-          # printf rather than echo throughout: some shells expand backslash escapes
-          # in echo, which would turn a literal \n inside a path back into a real
-          # newline and undo the escaping below.
           die() { printf '%s\n' "::error::$(esc "$1")"; exit 1; }
 
-          # GitHub parses workflow commands one line at a time, so every value
-          # interpolated into one is escaped: a path may legally contain a newline,
-          # which would otherwise let it forge a second command. Property values
-          # need `:` and `,` too, as those delimit the property list.
           esc() { local s=${1//'%'/%25}; s=${s//$'\r'/%0D}; s=${s//$'\n'/%0A}; printf '%s' "$s"; }
           esc_prop() { local s; s=$(esc "$1"); s=${s//:/%3A}; s=${s//,/%2C}; printf '%s' "$s"; }
 
           work=$(mktemp -d)
           trap 'rm -rf "$work"' EXIT
 
-          # -z keeps paths literal. Without it git C-quotes any path containing a
-          # control character, and that quoted string matches neither the repo nor
-          # the ignore rules — so a crafted path could slip past the check. Literal
-          # paths are why the escaping above is required, not optional.
           git diff --raw -z --no-renames --diff-filter=AMT "$BASE_SHA...$HEAD_SHA" > "$work/diff" \
             || die "Cannot diff $BASE_SHA...$HEAD_SHA. Refusing to pass without having checked."
           git ls-tree -r -z --name-only "$HEAD_SHA" > "$work/tree" \
             || die "Cannot list the tree at $HEAD_SHA. Refusing to pass without having checked."
 
-          # Probe sandbox: HEAD's .gitignore files and nothing else. Probing cannot
-          # happen in the real worktree — once the symlink exists on disk, git
-          # refuses to resolve a pathspec "beyond a symbolic link".
           sandbox="$work/sandbox"
           mkdir -p "$sandbox"
           git -C "$sandbox" init -q .
 
-          # Only ignore rules committed to the repo may decide the verdict. A
-          # runner's global core.excludesFile and the info/exclude the init
-          # template writes both reach --no-index, and would make the result
-          # depend on the machine rather than on the PR.
           : > "$sandbox/.git/info/exclude"
           ignored() {
             git -c core.excludesFile=/dev/null -C "$sandbox" \
@@ -107,17 +75,10 @@ jobs:
               || die "Cannot read $gi at $HEAD_SHA. Refusing to pass without having checked."
           done < "$work/tree"
 
-          # --raw -z emits ":<modes> <shas> <status>" and the path as two separate
-          # NUL-terminated records, so read them in pairs.
           while IFS= read -r -d '' meta && IFS= read -r -d '' path; do
             mode=$(printf '%s' "$meta" | awk '{print $2}')
-            # A tracked directory is normal; only blobs and symlinks land at a path.
             case "$mode" in 040000|000000) continue ;; esac
 
-            # Hole test, decided by git's own matcher rather than pattern parsing,
-            # so negations, nesting and precedence are handled for free: children
-            # of the path are ignored, the path itself is not. check-ignore uses
-            # lstat, so a symlink to a real directory still reads as "not a dir".
             if ! ignored "$path" && ignored "$path/__probe__"; then
               kind="file"
               if [ "$mode" = "120000" ]; then
@@ -129,12 +90,9 @@ jobs:
               fail=1
             fi
 
-            # Independent rule: a tracked symlink must not escape the worktree.
             if [ "$mode" = "120000" ]; then
               target=$(git show "$HEAD_SHA:$path") \
                 || die "Cannot read the symlink target of $path at $HEAD_SHA."
-              # normpath is pure string work: it must not resolve against the
-              # worktree, where the symlink already exists.
               resolved=$(python3 -c 'import posixpath,sys; print(posixpath.normpath(posixpath.join(posixpath.dirname(sys.argv[1]), sys.argv[2])))' "$path" "$target") \
                 || die "Cannot resolve the symlink target of $path."
               escape=0
