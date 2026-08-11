@@ -38,9 +38,6 @@ jobs:
 
       - name: Ignored directory replacement
         if: github.event_name == 'pull_request'
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -uo pipefail
           fail=0
@@ -116,4 +113,6 @@ jobs:
             exit 1
           fi
           echo "No ignored-directory replacement detected."
-        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
