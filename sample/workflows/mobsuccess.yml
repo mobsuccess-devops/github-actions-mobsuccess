@@ -116,3 +116,5 @@ jobs:
             exit 1
           fi
           echo "No ignored-directory replacement detected."
+        # Keep a plain scalar last: Prettier requires a blank line between a block scalar and the "# DO NOT EDIT: END" marker appended here.
+        shell: bash
