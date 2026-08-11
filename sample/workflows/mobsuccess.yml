@@ -38,9 +38,6 @@ jobs:
 
       - name: Ignored directory replacement
         if: github.event_name == 'pull_request'
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -uo pipefail
           fail=0
@@ -116,5 +113,6 @@ jobs:
             exit 1
           fi
           echo "No ignored-directory replacement detected."
-        # Keep a plain scalar last: Prettier requires a blank line between a block scalar and the "# DO NOT EDIT: END" marker appended here.
-        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
