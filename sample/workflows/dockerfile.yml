@@ -9,10 +9,16 @@ on:
       - opened
       - synchronize
       - reopened
+    paths:
+      - "**/Dockerfile*"
+      - ".github/workflows/dockerfile.yml"
   push:
     branches:
       - master
       - prod
+    paths:
+      - "**/Dockerfile*"
+      - ".github/workflows/dockerfile.yml"
 
 jobs:
   dockerfile:
