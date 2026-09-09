@@ -43,10 +43,12 @@ jobs:
           action: create-linear-issue-from-bot-pr
           linearApiKey: ${{ secrets.LINEAR_API_KEY }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
+          linearIssueId: ${{ steps.check-pr-title-compliance.outputs.linearIssueId }}
 
       - uses: mobsuccess-devops/github-actions-linear@master
         with:
           action: check-linear-state
           linearApiKey: ${{ secrets.LINEAR_API_KEY }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
+          linearIssueId: ${{ steps.check-pr-title-compliance.outputs.linearIssueId }}
 # DO NOT EDIT: END
