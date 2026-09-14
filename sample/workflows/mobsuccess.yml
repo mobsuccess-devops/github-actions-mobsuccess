@@ -24,7 +24,10 @@ jobs:
       || (github.event.issue.pull_request != null
       && !endsWith(github.event.comment.user.login, '[bot]'))
     concurrency:
-      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      # issue_comment events carry no github.event.pull_request, so they must fall
+      # back to github.event.issue.number: without it every PR comment across the repo
+      # would share a single github.ref group and evict each other's pending runs.
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.issue.number || github.ref }}
       cancel-in-progress: ${{ github.event_name == 'pull_request' && github.event.action == 'synchronize' }}
     runs-on: ubuntu-slim
     timeout-minutes: 2
