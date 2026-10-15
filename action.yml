@@ -7,12 +7,6 @@ inputs:
   github-token:
     description: "your github auth token"
     required: false
-  amplify-uri:
-    description: "the AWS Amplify URI template"
-    required: false
-  storybook-amplify-uri:
-    description: "the AWS Amplify Storybook URI template"
-    required: false
   unreleased-tag:
     description: "Latest unreleased (yet) tag for which to generate changelog"
     required: false
